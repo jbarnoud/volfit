@@ -29,7 +29,8 @@ AA_PROBE = 1.85
 #AA_PROBE = 0
 SPACING = 0.05
 
-SIGMA = 4
+#SIGMA = 4
+SIGMA = 3.3
 TRADIUS = 0.5 * (2 ** (1/6) * SIGMA)
 
 MAPPINGS = {
@@ -116,14 +117,14 @@ def compare_models(u, ucg_base, mappings, spacing, probe):
     
     # Compute the AA volume
     aa_grid = bool_grid(u.atoms.positions, mesh, radii_aa, probe)
-    aa_volume = aa_grid.sum() * spacing ** 2
+    aa_volume = aa_grid.sum() * spacing ** 3
     
     # Compute the CG volume
     cg_grid = bool_grid(ucg_base.atoms.positions, mesh, radii_cg, probe)
-    cg_volume = cg_grid.sum() * spacing ** 2
+    cg_volume = cg_grid.sum() * spacing ** 3
     
     # Compute the mismatch
-    mismatch = get_score(aa_grid, cg_grid) * spacing ** 2
+    mismatch = get_score(aa_grid, cg_grid) * spacing ** 3
     
     diff_grid = aa_grid.astype(int) - cg_grid.astype(int)
     
@@ -199,6 +200,7 @@ def minimize_score(reference, mobile_coords, centers, mesh, spacing, radii, prob
     mines = mesh.min(axis=mesh_axes)
     maxes = mesh.max(axis=mesh_axes)
     accepted = 0
+    volume_cg = 0
     
     for iteration in range(steps):
         scores_mc[iteration + 1] = scores_mc[iteration]
@@ -226,12 +228,13 @@ def minimize_score(reference, mobile_coords, centers, mesh, spacing, radii, prob
             coordinates = new_coordinates
             score = score_mc
             traj[accepted] = coordinates
+            volume_cg = gbool_cg_mc.sum()
         scores_mc[iteration + 1] = score_mc
         scores[iteration + 1] = score
         errors[iteration + 1] = error
         attractions[iteration + 1] = attraction
 
         if iteration % 100 == 0:
-            print('{} -- {} accepted -- score {}'
-                  .format(iteration, accepted, score))
+            print('{} -- {} accepted -- score {} -- volume CG {} cells'
+                  .format(iteration, accepted, score, volume_cg))
     return traj[:accepted + 1], scores, scores_mc, attractions, errors
