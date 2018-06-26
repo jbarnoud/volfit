@@ -47,17 +47,45 @@ MAPPINGS = {
         ['C2', 'C3', 'H2', 'H3'],
     ],
     'TECE': [
-        ['C14', 'C10'],
-        ['C17', 'C18'],
+        ['C14', 'C10', 'H9', 'H6'],
+        ['C17', 'C18', 'H11', 'H12'],
         ['C7', 'C12'],
-        ['C2', 'C1'],
-        ['C5', 'C9'],
-        ['C11', 'C6'],
-        ['C4', 'C3'],
-        ['C15', 'C16'],
-        ['C8', 'C13'],
+        ['C2', 'C1', 'H1', 'H2'],
+        ['C5', 'C9', 'H4', 'H7'],
+        ['C11', 'C6', 'H5'],
+        ['C4', 'C3', 'H3'],
+        ['C15', 'C16', 'H10'],
+        ['C8', 'C13', 'H8'],
     ],
+    'CORO': [
+		['H3', 'C1', 'C6', 'H4'],
+		['C13', 'H6', 'C12', 'H5'],
+		['H9', 'C20', 'C21', 'H10'],
+		['H11', 'C23', 'C24', 'H12'],
+		['H2', 'C15', 'C16', 'H1'],
+		['H7', 'C17', 'C18', 'H8'],
+		['C14', 'C8'],
+		['C22', 'C10'],
+		['C2', 'C3'],
+		['C11', 'C9'],
+		['C5', 'C4'],
+		['C19', 'C7'],
+	],
 }
+
+
+def read_ndx_mapping(lines):
+    mapping = []
+    current = None
+    for line in lines:
+        if line.startswith('['):
+            current = []
+            mapping.append(current)
+        elif current is None:
+            raise IOError('NDX file cannot have indices before a header.')
+        else:
+            current.extend(int(x) - 1 for x in line.split())
+    return mapping
 
 
 def orient(u):
